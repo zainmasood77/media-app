@@ -9,7 +9,6 @@ CORS(app)
 UPLOAD_FOLDER = "uploads"
 PROCESSED_FOLDER = "processed"
 
-# Create folders if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
@@ -17,7 +16,6 @@ os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 def home():
     return "Backend is running!"
 
-# Upload and process image
 @app.route('/upload', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:
@@ -25,32 +23,25 @@ def upload_image():
 
     file = request.files['file']
 
-    # Save original image
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
-    # Open and resize image
     img = Image.open(filepath)
     img = img.resize((300, 300))
 
-    # Save processed image
     processed_path = os.path.join(PROCESSED_FOLDER, file.filename)
     img.save(processed_path)
 
     return jsonify({
         "message": "Image uploaded and processed",
-        "image_url": f"http://localhost:5000/image/{file.filename}"
+        "image_url": f"https://media-backend-e6ps.onrender.com/processed/{file.filename}"
     })
 
-# Serve processed image to browser
-@app.route('/image/<filename>')
-def get_image(filename):
+@app.route('/processed/<filename>')
+def get_processed_file(filename):
     return send_from_directory(PROCESSED_FOLDER, filename)
 
+# IMPORTANT: only ONE run block
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-
-import os
-
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
