@@ -34,14 +34,13 @@ def upload_image():
 
     return jsonify({
         "message": "Image uploaded and processed",
-        "image_url": f"https://media-backend-e6ps.onrender.com/processed/{file.filename}"
+        "image_url": f"/processed/{file.filename}"
     })
 
 @app.route('/processed/<filename>')
 def get_processed_file(filename):
     return send_from_directory(PROCESSED_FOLDER, filename)
 
-# IMPORTANT: only ONE run block
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
