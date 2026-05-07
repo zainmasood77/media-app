@@ -15,17 +15,17 @@ pipeline {
             }
         }
 
-     stage('Build Frontend') {
-    steps {
-        sh '''
-        docker run --rm \
-        -v /var/jenkins_home/workspace/media-app/frontend:/app \
-        -w /app \
-        node:18 \
-        npm install
-        '''
-    }
-}
+        stage('Build Frontend') {
+            steps {
+                sh '''
+                docker run --rm \
+                -v /var/jenkins_home/workspace/media-app/frontend:/app \
+                -w /app \
+                node:18 \
+                npm install
+                '''
+            }
         }
+
     }
 }
