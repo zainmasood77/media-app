@@ -15,15 +15,19 @@ pipeline {
             }
         }
 
-        stage('Install Node & Build Frontend') {
+        stage('Build Frontend') {
+            agent {
+                docker {
+                    image 'node:18'
+                    args '-u root'   // ensures permissions work
+                }
+            }
             steps {
-                sh '''
-                apt update
-                apt install -y nodejs npm
-
-                cd frontend
-                npm install
-                '''
+                dir('frontend') {
+                    sh '''
+                    npm install
+                    '''
+                }
             }
         }
 
