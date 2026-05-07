@@ -15,17 +15,17 @@ pipeline {
             }
         }
 
-       stage('Build Frontend') {
-    steps {
-        sh '''
-        docker run --rm \
-        -v $(pwd)/frontend:/app \
-        -w /app \
-        node:18 \
-        npm install
-        '''
-    }
-}
+        stage('Install Node & Build Frontend') {
+            steps {
+                sh '''
+                apt update
+                apt install -y nodejs npm
+
+                cd frontend
+                npm install
+                '''
+            }
+        }
 
     }
 }
