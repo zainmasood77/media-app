@@ -22,8 +22,16 @@ docker run --rm \
 -v /var/jenkins_home/workspace/media-app/frontend:/app \
 -w /app \
 node:18 \
-sh -c "npm install && npm run build"
-'''
+npm install
+                '''
+
+                sh '''
+docker run --rm \
+-v /var/jenkins_home/workspace/media-app/frontend:/app \
+-w /app \
+node:18 \
+npm run build
+                '''
             }
         }
     }
