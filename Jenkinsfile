@@ -15,21 +15,16 @@ pipeline {
             }
         }
 
-       stage('Build Frontend') {
-    agent {
-        docker {
-            image 'node:18'
-            args '-u root'
-        }
-    }
+      stage('Build Frontend') {
     steps {
-        dir('frontend') {
-            sh '''
-            npm install
-            npm run build
-            '''
-        }
+        sh '''
+        docker run --rm \
+        -v /var/jenkins_home/workspace/media-app/frontend:/app \
+        -w /app node:18 \
+        sh -c "npm install && npm run build"
+        '''
     }
+}
 }
 
     }
