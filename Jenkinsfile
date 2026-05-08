@@ -15,19 +15,31 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
+        stage('Debug Paths') {
+            steps {
+                sh 'pwd'
+                sh 'ls -la'
+                sh 'ls -la frontend'
+            }
+        }
+
+        stage('Install Dependencies') {
             steps {
                 sh '''
 docker run --rm \
--v /var/jenkins_home/workspace/media-app/frontend:/app \
+-v $WORKSPACE/frontend:/app \
 -w /app \
 node:18 \
 npm install
                 '''
+            }
+        }
 
+        stage('Build Frontend') {
+            steps {
                 sh '''
 docker run --rm \
--v /var/jenkins_home/workspace/media-app/frontend:/app \
+-v $WORKSPACE/frontend:/app \
 -w /app \
 node:18 \
 npm run build
