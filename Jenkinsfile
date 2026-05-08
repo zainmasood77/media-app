@@ -23,7 +23,7 @@ pipeline {
                   -v ${WORKSPACE}/frontend:/app \
                   -w /app \
                   node:18 \
-                  sh -c "ls -la && npm install && npm run build"
+                  sh -c "npm install && npm run build"
                 """
             }
         }
@@ -33,10 +33,7 @@ pipeline {
                 sh '''
                 echo "Deploying full app with Docker Compose..."
 
-                # Stop old containers (ignore errors)
                 docker-compose down || true
-
-                # Build and start everything
                 docker-compose up -d --build
                 '''
             }
