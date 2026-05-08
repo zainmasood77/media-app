@@ -15,21 +15,22 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
-            agent {
-                docker {
-                    image 'node:18'
-                    args '-u root'   // ensures permissions work
-                }
-            }
-            steps {
-                dir('frontend') {
-                    sh '''
-                    npm install
-                    '''
-                }
-            }
+       stage('Build Frontend') {
+    agent {
+        docker {
+            image 'node:18'
+            args '-u root'
         }
+    }
+    steps {
+        dir('frontend') {
+            sh '''
+            npm install
+            npm run build
+            '''
+        }
+    }
+}
 
     }
 }
