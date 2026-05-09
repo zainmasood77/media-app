@@ -23,29 +23,19 @@ pipeline {
             }
         }
 
-        stage('Deploy Frontend') {
+        stage('Deploy App') {
             steps {
                 sh '''
-                echo "Deploying frontend to /var/www/html..."
+                echo "Deploying full app with Docker Compose..."
 
-                mkdir -p /var/www/html
-                rm -rf /var/www/html/*
-
-                cp -r frontend/build/* /var/www/html/
-                '''
-            }
-        }
-
-        stage('Deploy Backend') {
-            steps {
-                sh '''
-                echo "Deploying backend using docker-compose..."
-
-                # Disable buildx (IMPORTANT FIX)
+                # Fix for Docker buildx issue
                 export DOCKER_BUILDKIT=0
                 export COMPOSE_DOCKER_CLI_BUILD=0
 
+                # Stop old containers (ignore error if none exist)
                 docker-compose down || true
+
+                # Build and start everything (frontend + backend)
                 docker-compose up -d --build
                 '''
             }
@@ -54,7 +44,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Deployment Successful!'
+            echo '🎉 Full App Deployment Successful!'
         }
         failure {
             echo '❌ Deployment Failed!'
