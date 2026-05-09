@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Clone') {
-            steps {
-                git 'https://github.com/zainmasood77/media-app.git'
-            }
-        }
-
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
