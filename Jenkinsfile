@@ -6,15 +6,21 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 sh '''
-                docker run --rm -i node:18 sh -c "
-                mkdir app && cd app &&
-                cat > app.tar &&
-                tar -xf app.tar &&
-                cd frontend &&
+                docker run --rm \
+                -v /tmp:/tmp \
+                node:18 sh -c "
+                cp -r /tmp/workspace /app &&
+                cd /app/frontend &&
                 npm install &&
                 npm run build
-                " < <(tar -cf - .)
+                "
                 '''
+            }
+        }
+
+        stage('Prepare Workspace') {
+            steps {
+                sh 'cp -r $WORKSPACE /tmp/workspace'
             }
         }
 
