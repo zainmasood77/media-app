@@ -5,15 +5,13 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                dir('frontend') {
-                    sh '''
-                    docker run --rm \
-                    -v $PWD:/app \
-                    -w /app \
-                    node:18 \
-                    sh -c "npm install && npm run build"
-                    '''
-                }
+                sh '''
+                docker run --rm \
+                -v $WORKSPACE/frontend:/app \
+                -w /app \
+                node:18 \
+                sh -c "npm install && npm run build"
+                '''
             }
         }
 
