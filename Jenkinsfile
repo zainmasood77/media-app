@@ -22,16 +22,23 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                sh """
-                echo "Checking frontend files..."
-                ls -la ${WORKSPACE}/frontend
+                dir('frontend') {
+                    sh '''
+                    echo "Installing Node..."
+                    
+                    # Install Node if not present
+                    if ! command -v node > /dev/null; then
+                      curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                      apt-get install -y nodejs
+                    fi
 
-                docker run --rm \
-                  -v ${WORKSPACE}/frontend:/app \
-                  -w /app \
-                  node:18 \
-                  sh -c "ls -la && npm install && npm run build"
-                """
+                    node -v
+                    npm -v
+
+                    npm install
+                    npm run build
+                    '''
+                }
             }
         }
 
