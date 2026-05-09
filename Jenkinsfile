@@ -3,13 +3,17 @@ pipeline {
 
     stages {
 
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
-            }
+       stage('Build Frontend') {
+    steps {
+        sh '''
+        docker run --rm \
+        -v $PWD/frontend:/app \
+        -w /app \
+        node:18 \
+        sh -c "npm install && npm run build"
+        '''
+    }
+}
         }
 
         stage('Deploy Frontend') {
