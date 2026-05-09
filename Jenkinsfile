@@ -10,7 +10,19 @@ pipeline {
 
         stage('Clean Workspace') {
             steps {
-                deleteDir()
+                echo "Cleaning workspace safely..."
+
+                // Try normal cleanup, ignore failure
+                script {
+                    try {
+                        deleteDir()
+                    } catch (err) {
+                        echo "Normal cleanup failed, forcing cleanup..."
+                        sh '''
+                        rm -rf /var/jenkins_home/workspace/media-app* || true
+                        '''
+                    }
+                }
             }
         }
 
@@ -24,18 +36,24 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh '''
-                    echo "Installing Node..."
-                    
-                    # Install Node if not present
+                    echo "Installing Node.js..."
+
+                    # Install Node.js if not installed
                     if ! command -v node > /dev/null; then
-                      curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-                      apt-get install -y nodejs
+                        apt-get update
+                        apt-get install -y curl
+                        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                        apt-get install -y nodejs
                     fi
 
+                    echo "Node version:"
                     node -v
                     npm -v
 
+                    echo "Installing dependencies..."
                     npm install
+
+                    echo "Building React app..."
                     npm run build
                     '''
                 }
@@ -45,6 +63,8 @@ pipeline {
         stage('Deploy App') {
             steps {
                 sh '''
+                echo "Deploying app with Docker Compose..."
+
                 docker-compose down || true
                 docker-compose up -d --build
                 '''
@@ -54,7 +74,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Deployment Successful!'
+            echo '🎉 Deployment Successful! Your app is live.'
         }
         failure {
             echo '❌ Deployment Failed!'
