@@ -8,6 +8,12 @@ pipeline {
 
     stages {
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/zainmasood77/media-app.git'
@@ -17,13 +23,14 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 sh """
-                echo "Building frontend using Docker..."
+                echo "Checking frontend files..."
+                ls -la ${WORKSPACE}/frontend
 
                 docker run --rm \
                   -v ${WORKSPACE}/frontend:/app \
                   -w /app \
                   node:18 \
-                  sh -c "npm install && npm run build"
+                  sh -c "ls -la && npm install && npm run build"
                 """
             }
         }
@@ -31,8 +38,6 @@ pipeline {
         stage('Deploy App') {
             steps {
                 sh '''
-                echo "Deploying full app with Docker Compose..."
-
                 docker-compose down || true
                 docker-compose up -d --build
                 '''
@@ -42,7 +47,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Full App Deployment Successful!'
+            echo '🎉 Deployment Successful!'
         }
         failure {
             echo '❌ Deployment Failed!'
