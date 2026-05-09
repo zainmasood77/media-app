@@ -10,19 +10,7 @@ pipeline {
 
         stage('Clean Workspace') {
             steps {
-                echo "Cleaning workspace safely..."
-
-                // Try normal cleanup, ignore failure
-                script {
-                    try {
-                        deleteDir()
-                    } catch (err) {
-                        echo "Normal cleanup failed, forcing cleanup..."
-                        sh '''
-                        rm -rf /var/jenkins_home/workspace/media-app* || true
-                        '''
-                    }
-                }
+                deleteDir()
             }
         }
 
@@ -34,36 +22,22 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                dir('frontend') {
-                    sh '''
-                    echo "Installing Node.js..."
+                sh '''
+                echo "Building frontend using Docker (FIXED)..."
 
-                    # Install Node.js if not installed
-                    if ! command -v node > /dev/null; then
-                        apt-get update
-                        apt-get install -y curl
-                        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-                        apt-get install -y nodejs
-                    fi
-
-                    echo "Node version:"
-                    node -v
-                    npm -v
-
-                    echo "Installing dependencies..."
-                    npm install
-
-                    echo "Building React app..."
-                    npm run build
-                    '''
-                }
+                docker run --rm \
+                  -v /var/jenkins_home/workspace/media-app:/workspace \
+                  -w /workspace/frontend \
+                  node:18 \
+                  sh -c "ls -la && npm install && npm run build"
+                '''
             }
         }
 
         stage('Deploy App') {
             steps {
                 sh '''
-                echo "Deploying app with Docker Compose..."
+                echo "Deploying app..."
 
                 docker-compose down || true
                 docker-compose up -d --build
@@ -74,7 +48,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Deployment Successful! Your app is live.'
+            echo '🎉 Deployment Successful!'
         }
         failure {
             echo '❌ Deployment Failed!'
