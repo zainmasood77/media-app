@@ -16,15 +16,17 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                sh '''
-                echo "Building frontend using Docker..."
+                dir('frontend') {
+                    sh '''
+                    echo "Building frontend using Docker..."
 
-                docker run --rm \
-                  -v $PWD/frontend:/app \
-                  -w /app \
-                  node:18 \
-                  sh -c "npm install && npm run build"
-                '''
+                    docker run --rm \
+                      -v $PWD:/app \
+                      -w /app \
+                      node:18 \
+                      sh -c "npm install && npm run build"
+                    '''
+                }
             }
         }
 
