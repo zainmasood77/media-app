@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_BUILDKIT = '0'
-        COMPOSE_DOCKER_CLI_BUILD = '0'
-    }
-
     stages {
 
         stage('Clean Workspace') {
@@ -22,22 +17,24 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                sh '''
-                echo "Building frontend using Docker (FIXED)..."
+                dir('frontend') {
+                    sh '''
+                    echo "Using Node inside Docker properly..."
 
-                docker run --rm \
-                  -v /var/jenkins_home/workspace/media-app:/workspace \
-                  -w /workspace/frontend \
-                  node:18 \
-                  sh -c "ls -la && npm install && npm run build"
-                '''
+                    docker run --rm \
+                      -v $(pwd):/app \
+                      -w /app \
+                      node:18 \
+                      sh -c "npm install && npm run build"
+                    '''
+                }
             }
         }
 
-        stage('Deploy App') {
+        stage('Deploy Backend') {
             steps {
                 sh '''
-                echo "Deploying app..."
+                echo "Deploying backend..."
 
                 docker-compose down || true
                 docker-compose up -d --build
@@ -48,10 +45,10 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Deployment Successful!'
+            echo '🎉 SUCCESS: App deployed!'
         }
         failure {
-            echo '❌ Deployment Failed!'
+            echo '❌ FAILED'
         }
     }
 }
