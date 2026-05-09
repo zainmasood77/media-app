@@ -1,25 +1,30 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_BUILDKIT = '0'
+        COMPOSE_DOCKER_CLI_BUILD = '0'
+    }
+
     stages {
 
         stage('Checkout Code') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/zainmasood77/media-app.git'
             }
         }
 
         stage('Build Frontend') {
             steps {
-                dir('frontend') {
-                    sh '''
-                    echo "Installing frontend dependencies..."
-                    npm install
+                sh '''
+                echo "Building frontend using Docker..."
 
-                    echo "Building frontend..."
-                    npm run build
-                    '''
-                }
+                docker run --rm \
+                  -v $PWD/frontend:/app \
+                  -w /app \
+                  node:18 \
+                  sh -c "npm install && npm run build"
+                '''
             }
         }
 
@@ -28,14 +33,10 @@ pipeline {
                 sh '''
                 echo "Deploying full app with Docker Compose..."
 
-                # Fix for Docker buildx issue
-                export DOCKER_BUILDKIT=0
-                export COMPOSE_DOCKER_CLI_BUILD=0
-
-                # Stop old containers (ignore error if none exist)
+                # Stop old containers (ignore errors)
                 docker-compose down || true
 
-                # Build and start everything (frontend + backend)
+                # Build and start everything
                 docker-compose up -d --build
                 '''
             }
