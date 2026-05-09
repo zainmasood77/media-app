@@ -5,7 +5,11 @@ pipeline {
 
         stage('Prepare Workspace') {
             steps {
-                sh 'cp -r $WORKSPACE /tmp/workspace'
+                sh '''
+                rm -rf /tmp/workspace
+                mkdir -p /tmp/workspace
+                cp -r $WORKSPACE/* /tmp/workspace/
+                '''
             }
         }
 
