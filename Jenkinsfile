@@ -18,7 +18,7 @@ pipeline {
                 sh '''
                 docker run --rm \
                 -v /tmp/workspace:/app \
-                -w /app/frontend \
+                -w /app/frontend/frontend \
                 node:18 \
                 sh -c "npm install && npm run build"
                 '''
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 sh '''
                 rm -rf /var/www/html/*
-                cp -r frontend/build/* /var/www/html/
+                cp -r frontend/frontend/build/* /var/www/html/
                 '''
             }
         }
