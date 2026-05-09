@@ -5,20 +5,22 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                sh '''
-                docker run --rm \
-                -v $PWD/frontend:/app \
-                -w /app \
-                node:18 \
-                sh -c "npm install && npm run build"
-                '''
+                dir('frontend') {
+                    sh '''
+                    docker run --rm \
+                    -v $PWD:/app \
+                    -w /app \
+                    node:18 \
+                    sh -c "npm install && npm run build"
+                    '''
+                }
             }
         }
 
         stage('Deploy Frontend') {
             steps {
-                sh 'sudo rm -rf /var/www/html/*'
-                sh 'sudo cp -r frontend/build/* /var/www/html/'
+                sh 'rm -rf /var/www/html/*'
+                sh 'cp -r frontend/build/* /var/www/html/'
             }
         }
 
