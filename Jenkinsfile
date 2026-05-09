@@ -19,13 +19,12 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh '''
-                    echo "Using Node inside Docker properly..."
+                    echo "Building frontend..."
 
-                    docker run --rm \
-                      -v $(pwd):/app \
-                      -w /app \
-                      node:18 \
-                      sh -c "npm install && npm run build"
+                    ls -la
+
+                    npm install
+                    npm run build
                     '''
                 }
             }
@@ -45,7 +44,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 SUCCESS: App deployed!'
+            echo '🎉 SUCCESS'
         }
         failure {
             echo '❌ FAILED'
