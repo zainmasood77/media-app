@@ -1,6 +1,7 @@
 from flask_cors import CORS
 from flask import Flask, request, jsonify, send_from_directory
 from PIL import Image
+import boto3
 import os
 
 app = Flask(__name__)
@@ -8,9 +9,11 @@ CORS(app)
 
 UPLOAD_FOLDER = "uploads"
 PROCESSED_FOLDER = "processed"
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+
+BUCKET_NAME = "media-app-zain"
+s3 = boto3.client('s3', region_name='us-east-1')
 
 @app.route('/')
 def home():
@@ -22,19 +25,24 @@ def upload_image():
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files['file']
+    filename = file.filename
 
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
     img = Image.open(filepath)
     img = img.resize((300, 300))
-
-    processed_path = os.path.join(PROCESSED_FOLDER, file.filename)
+    processed_path = os.path.join(PROCESSED_FOLDER, filename)
     img.save(processed_path)
+
+    s3.upload_file(filepath, BUCKET_NAME, f"uploads/{filename}")
+    s3.upload_file(processed_path, BUCKET_NAME, f"processed/{filename}")
 
     return jsonify({
         "message": "Image uploaded and processed",
-        "image_url": f"/processed/{file.filename}"
+        "image_url": f"/processed/{filename}",
+        "s3_original": f"s3://{BUCKET_NAME}/uploads/{filename}",
+        "s3_processed": f"s3://{BUCKET_NAME}/processed/{filename}"
     })
 
 @app.route('/processed/<filename>')
