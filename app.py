@@ -13,7 +13,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 BUCKET_NAME = "media-app-zain"
-s3 = boto3.client('s3', region_name='us-east-1')
+REGION = "us-east-1"
+s3 = boto3.client('s3', region_name=REGION)
 
 @app.route('/')
 def home():
@@ -36,11 +37,14 @@ def upload_image():
     img.save(processed_path)
 
     s3.upload_file(filepath, BUCKET_NAME, f"uploads/{filename}")
-    s3.upload_file(processed_path, BUCKET_NAME, f"processed/{filename}")
+    s3.upload_file(processed_path, BUCKET_NAME, f"processed/{filename}",
+                   ExtraArgs={'ContentType': 'image/jpeg'})
+
+    s3_processed_url = f"https://{BUCKET_NAME}.s3.{REGION}.amazonaws.com/processed/{filename}"
 
     return jsonify({
         "message": "Image uploaded and processed",
-        "image_url": f"/processed/{filename}",
+        "image_url": s3_processed_url,
         "s3_original": f"s3://{BUCKET_NAME}/uploads/{filename}",
         "s3_processed": f"s3://{BUCKET_NAME}/processed/{filename}"
     })
